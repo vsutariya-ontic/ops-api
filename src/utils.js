@@ -1,9 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User, Item, CartItem, Table, Order } = require("./models");
-
-const JWT_KEY = "special-key";
-const SALT_ROUNDS_FOR_PASSWORD = 10;
+const { JWT_KEY } = require("./constants");
 
 const generateToken = (userData, validity) => {
   return new Promise((resolve, reject) => {
@@ -34,7 +32,7 @@ const handlePostSignup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(
       user_password,
-      SALT_ROUNDS_FOR_PASSWORD
+      SALT_ROUNDS_FOR_HASHING
     );
     const newUser = new User({
       user_name: user_name,
@@ -89,7 +87,7 @@ const handlePostLogin = async (req, res) => {
       user_name: user[0].user_name,
       user_role: user[0].user_role,
     };
-    const authToken = await generateToken(userData, 1000 * 60 * 24 * 7); // 7 days
+    const authToken = await generateToken(userData, 1000 * 60 * 60 * 24 * 7); // 7 days
 
     res.json({
       success: true,

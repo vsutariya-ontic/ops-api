@@ -1,37 +1,48 @@
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
+// lodash imports
 const _includes = require("lodash/includes");
 
-const JWT_KEY = "special-key";
-const SALT_ROUNDS_FOR_PASSWORD = 10;
-const UNAUTHORIZED_JSON = {
-  error: "Unauthorized",
-};
-const UNAUTHORIZED_STATUS_CODE = 401;
-const NO_AUTH_MIDDLEWARE_PATHS = ["/new-login", "/new-signup", "/new-delete"];
+const { readUser, readUserById } = require("./crud");
+const {
+  UNAUTHORIZED_STATUS_CODE,
+  UNAUTHORIZED_JSON,
+  NO_AUTH_MIDDLEWARE_PATHS,
+} = require("./constants");
 
-const generateToken = (userData, validity) => {
-  return new Promise((resolve, reject) => {
-    jwt.sign(userData, JWT_KEY, { expiresIn: validity }, (err, token) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(token);
-      }
-    });
-  });
+// TODO: check if the async one works or not as jwt functions are synchronous
+// const generateToken = (userData, validity) => {
+//   return new Promise((resolve, reject) => {
+//     jwt.sign(userData, JWT_KEY, { expiresIn: validity }, (err, token) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         resolve(token);
+//       }
+//     });
+//   });
+// };
+const generateToken = async (userData, validity) => {
+  // return new Promise((resolve, reject) => {
+  const token = jwt.sign(userData, JWT_KEY, { expiresIn: validity });
+  return token;
 };
 
-const verifyToken = (token) => {
-  return new Promise((resolve, reject) => {
-    jwt.verify(token, JWT_KEY, (err, valid) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(valid);
-      }
-    });
-  });
+// TODO: check if the async one works or not as jwt functions are synchronous
+// const verifyToken = (token) => {
+//   return new Promise((resolve, reject) => {
+//     jwt.verify(token, JWT_KEY, (err, valid) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         resolve(valid);
+//       }
+//     });
+//   });
+// };
+const verifyToken = async (token) => {
+  const userData = await jwt.verify(token, JWT_KEY);
+  return userData;
 };
 
 const authMiddleware = async (req, res, next) => {
@@ -41,7 +52,10 @@ const authMiddleware = async (req, res, next) => {
     }
     const authToken = req.headers["authorization"];
     const userData = await verifyToken(authToken);
-    req.userData = userData;
+
+    const currUserData = await readUserById(userData?.userId);
+    req.userData = currUserData;
+
     next();
   } catch (err) {
     res.status(UNAUTHORIZED_STATUS_CODE).json(UNAUTHORIZED_JSON);
@@ -50,4 +64,5 @@ const authMiddleware = async (req, res, next) => {
 
 module.exports = {
   authMiddleware,
+  generateToken,
 };

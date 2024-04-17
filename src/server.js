@@ -1,7 +1,5 @@
 const express = require("express");
-const ExpressRequest = require("express/Request");
-const ExpressResponse = require("express/Response");
-console.log(ExpressResponse);
+const bcrypt = require("bcrypt");
 const cors = require("cors");
 const {
   handlePostLogin,
@@ -24,9 +22,12 @@ const {
 
 const { authMiddleware } = require("../authMIddleware");
 const { readItem, readAllItems } = require("../crud");
+const { readUser, createUser, updateUser } = require("./crud");
 
-const SUCCESS_STATUS = 200;
-const PORT = 4000;
+// lodash imports
+const _isEmpty = require("lodash/isEmpty");
+const { generateToken } = require("./utils");
+const { SALT_ROUNDS_FOR_HASHING, PORT } = require("./constants");
 
 const getResponseJson = (data, success = true) => {
   if (!data) {
@@ -74,10 +75,55 @@ app.post("/update-order-status", handlePostUpdateOrderStatus);
 /* version 2.0 */
 
 /* user api call handlers */
-const handleNewPostLogin = async (request, response) => {};
+const handleNewPostLogin = async (request, response) => {
+  try {
+    const { userEmail, userPassword, userRole } = request.body;
+    const user = readUser(userEmail, userRole);
+
+    if (_isEmpty(user)) {
+      response.json(getResponseJson("INVALID_CREDENTIALS", false));
+    }
+
+    const isCorrect = await bcrypt.compare(userPassword, user[0].user_password);
+    if (!isCorrect) {
+      response.json(getResponseJson("INVALID_CREDENTIALS", false));
+    }
+
+    const userData = {
+      userId: user[0].user_id,
+      userRole: userRole,
+    };
+    const authToken = await generateToken(userData, 1000 * 60 * 60 * 24 * 7); // 7 days validity
+    // TODO: set as cookie
+
+    response.json(getResponseJson(userData));
+  } catch (err) {
+    response.json(getResponseJson(err?.message || "INTERNAL_ERROR", false));
+  }
+};
 
 const handleNewPostSignup = async (request, response) => {
-  const {userFirstName, userLastName}
+  try {
+    const { userFirstName, userLastName, userEmail, userPassword, userRole } =
+      request.body;
+
+    const hashedPassword = await bcrypt.hash(
+      userPassword,
+      SALT_ROUNDS_FOR_HASHING
+    );
+
+    const successfullySavedUser = createUser({
+      user_first_name: userFirstName,
+      user_last_name: userLastName,
+      user_email: userEmail,
+      user_password: hashedPassword,
+      user_role: userRole.toLowerCase(),
+    });
+
+    response.json(getResponseJson(successfullySavedUser));
+  } catch (err) {
+    response.json(getResponseJson(err?.message || "INTERNAL_ERROR", false));
+  }
 };
 
 const handleNewGetValidate = async (request, response) => {
@@ -86,7 +132,14 @@ const handleNewGetValidate = async (request, response) => {
 
 const handleNewDeleteUser = async (request, response) => {};
 
-const handleNewPutUser = async (request, response) => {};
+const handleNewPutUser = async (request, response) => {
+  const newFields = request.body;
+  const userId = request.userData.user_id;
+
+  const successfullyUpdatedUser = await updateUser(newFields, userId);
+
+  response.json(getResponseJson(successfullyUpdatedUser));
+};
 
 /* user endpoints */
 app.post("/new-login", handleNewPostLogin);

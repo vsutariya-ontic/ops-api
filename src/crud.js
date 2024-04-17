@@ -1,27 +1,36 @@
 const { User, Item, Order, Table, Team, newOrder } = require("./models.js");
 
-const OrderStatus = {
-  1: "IN_CART",
-  2: "PLACED",
-  3: "ACCEPTED",
-  4: "COMPLETED",
+/* User */
+
+const readUserById = async (userId) => {
+  const user = await User.find({
+    user_id: userId,
+  });
+  return user?.[0];
 };
 
-/* User */
+const readUser = async (userEmail, userRole) => {
+  const user = await User.find({
+    user_email: userEmail,
+    user_role: userRole.toLowerCase(),
+  });
+  return user?.[0];
+};
+
 const createUser = async (propsUser) => {
   const createdUser = new User(propsUser);
   const successfullySavedUser = await createdUser.save();
   return successfullySavedUser;
 };
 
-const setDefaultTable = async (userId, table) => {
+const updateUser = async (newFields, userId) => {
   const successfullySavedUser = await findOneAndUpdate(
     {
       user_id: userId,
     },
     {
       $set: {
-        default_table: table,
+        ...newFields,
       },
     },
     {
@@ -41,7 +50,7 @@ const readItem = async (itemId) => {
   const item = await Item.find({
     item_id: itemId,
   });
-  return item;
+  return item[0];
 };
 
 const createItem = async (props) => {
@@ -77,7 +86,7 @@ const readOrder = async (userId) => {
   const order = await newOrder.find({
     user_id: userId,
   });
-  const items = order.items;
+  const items = order?.[0].items;
   return items;
 };
 
@@ -127,6 +136,8 @@ const deleteTable = async (tableId) => {
 };
 
 module.exports = {
+  readUserById,
+  readUser,
   createUser,
   readAllItems,
   readItem,
@@ -138,5 +149,5 @@ module.exports = {
   readTables,
   createTable,
   deleteTable,
-  setDefaultTable,
+  updateUser,
 };
