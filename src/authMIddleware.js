@@ -59,9 +59,9 @@ const authMiddleware = async (req, res, next) => {
 
     const userData = await verifyToken(authToken);
     const currUserData = await readUserById(
-      userData?.userId || userData?.user_id
+      userData?.userId || userData?.userId
     );
-    currUserData.user_password = undefined;
+    currUserData.userPassword = undefined;
     req.userData = currUserData;
 
     next();

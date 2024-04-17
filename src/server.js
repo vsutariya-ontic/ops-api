@@ -98,13 +98,13 @@ const handleNewPostLogin = async (request, response) => {
       response.json(getResponseJson("INVALID_CREDENTIALS", false));
     }
 
-    const isCorrect = await bcrypt.compare(userPassword, user[0].user_password);
+    const isCorrect = await bcrypt.compare(userPassword, user[0].userPassword);
     if (!isCorrect) {
       response.json(getResponseJson("INVALID_CREDENTIALS", false));
     }
 
     const userData = {
-      userId: user[0].user_id,
+      userId: user[0].userId,
       userRole: userRole,
     };
     const authToken = await generateToken(userData, 1000 * 60 * 60 * 24 * 7); // 7 days validity
@@ -134,11 +134,11 @@ const handleNewPostSignup = async (request, response) => {
     );
 
     const successfullySavedUser = createUser({
-      user_first_name: userFirstName,
-      user_last_name: userLastName,
-      user_email: userEmail,
-      user_password: hashedPassword,
-      user_role: userRole.toLowerCase(),
+      userFirstName: userFirstName,
+      userLastName: userLastName,
+      userEmail: userEmail,
+      userPassword: hashedPassword,
+      userRole: userRole.toLowerCase(),
     });
 
     response.json(getResponseJson(successfullySavedUser));
@@ -155,7 +155,7 @@ const handleNewDeleteUser = async (request, response) => {};
 
 const handleNewPutUser = async (request, response) => {
   const newFields = request.body;
-  const userId = request.userData.user_id;
+  const userId = request.userData.userId;
 
   const successfullyUpdatedUser = await updateUser(newFields, userId);
 

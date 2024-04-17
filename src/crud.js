@@ -4,15 +4,15 @@ const { User, Item, Order, Table, Team, newOrder } = require("./models.js");
 
 const readUserById = async (userId) => {
   const user = await User.find({
-    user_id: userId,
+    userId: userId,
   });
   return user?.[0];
 };
 
 const readUser = async (userEmail, userRole) => {
   const user = await User.find({
-    user_email: userEmail,
-    user_role: userRole.toLowerCase(),
+    userEmail: userEmail,
+    userRole: userRole.toLowerCase(),
   });
   return user?.[0];
 };
@@ -26,7 +26,7 @@ const createUser = async (propsUser) => {
 const updateUser = async (newFields, userId) => {
   const successfullySavedUser = await findOneAndUpdate(
     {
-      user_id: userId,
+      userId: userId,
     },
     {
       $set: {
@@ -48,7 +48,7 @@ const readAllItems = async () => {
 
 const readItem = async (itemId) => {
   const item = await Item.find({
-    item_id: itemId,
+    itemId: itemId,
   });
   return item[0];
 };
@@ -64,12 +64,12 @@ const createItem = async (props) => {
   } = props;
 
   const item = new Item({
-    item_name: itemName,
+    itemName: itemName,
     category: category,
-    quantity_left: quantityLeft,
-    time_to_make: timeToMake,
+    quantityLeft: quantityLeft,
+    timeToMake: timeToMake,
     ingredients: ingredients,
-    image_url: imageUrl,
+    imageUrl: imageUrl,
   });
 
   const successfullySavedItem = await item.save();
@@ -77,14 +77,14 @@ const createItem = async (props) => {
 };
 
 const deleteItem = async (itemId) => {
-  const deletedItems = await Item.deleteMany({ item_id: itemId });
+  const deletedItems = await Item.deleteMany({ itemId: itemId });
   return deletedItems;
 };
 
 /* Order */
 const readOrder = async (userId) => {
   const order = await newOrder.find({
-    user_id: userId,
+    userId: userId,
   });
   const items = order?.[0].items;
   return items;
@@ -99,7 +99,7 @@ const createOrder = async (propsOrder) => {
 const updateOrder = async (propsOrder) => {
   const successfullySavedOrder = await newOrder.findOneAndUpdate(
     {
-      user_id: propsOrder.userId,
+      userId: propsOrder.userId,
     },
     propsOrder,
     {
@@ -122,16 +122,16 @@ const createTable = async (props) => {
     throw new Error("INSUFFICIENT_DATA_FOR_TABLE_CREATION");
   }
   const createdTable = new Table({
-    table_no: tableNo,
-    table_name: tableName,
-    team_id: teamId,
+    tableNo: tableNo,
+    tableName: tableName,
+    teamId: teamId,
   });
   const successfullySavedTable = await createdTable.save();
   return successfullySavedTable;
 };
 
 const deleteTable = async (tableId) => {
-  const deletedTables = await Table.deleteMany({ table_id: tableId });
+  const deletedTables = await Table.deleteMany({ tableId: tableId });
   return deletedTables;
 };
 

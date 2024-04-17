@@ -1,23 +1,23 @@
 const mongoose = require("mongoose");
 const teamSchema = new mongoose.Schema({
-  team_id: {
+  teamId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     unique: true,
   },
-  team_name: { type: String, required: true },
-  team_location: { type: String, required: true },
+  teamName: { type: String, required: true },
+  teamLocation: { type: String, required: true },
 });
 
 const tableSchema = new mongoose.Schema({
-  table_id: {
+  tableId: {
     type: String,
     required: true,
     default: () => new mongoose.Types.ObjectId(),
   },
-  table_no: { type: Number, required: false, unique: true },
-  table_name: { type: String, required: false },
-  team_id: {
+  tableNo: { type: Number, required: false, unique: true },
+  tableName: { type: String, required: false },
+  teamId: {
     type: String,
     ref: "Team",
     required: false,
@@ -25,19 +25,19 @@ const tableSchema = new mongoose.Schema({
 });
 
 const userSchema = new mongoose.Schema({
-  user_id: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),
     required: true,
     unique: true,
   },
-  user_first_name: { type: String, required: false },
-  user_last_name: { type: String, required: false },
-  user_email: { type: String, required: true, unique: true },
-  user_password: { type: String, required: true },
-  user_role: { type: String, required: true },
-  default_table: { type: Object, required: false },
-  team_id: {
+  userFirstName: { type: String, required: false },
+  userLastName: { type: String, required: false },
+  userEmail: { type: String, required: true, unique: true },
+  userPassword: { type: String, required: true },
+  userRole: { type: String, required: true },
+  defaultTable: { type: Object, required: false },
+  teamId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Team",
     required: false,
@@ -45,59 +45,59 @@ const userSchema = new mongoose.Schema({
 });
 
 const itemSchema = new mongoose.Schema({
-  item_id: {
+  itemId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     default: () => new mongoose.Types.ObjectId(),
     unique: true,
   },
-  item_name: { type: String, required: true },
+  itemName: { type: String, required: true },
   category: { type: String, required: true },
-  quantity_left: { type: Number, required: true },
-  time_to_make: { type: Number, required: true },
+  quantityLeft: { type: Number, required: true },
+  timeToMake: { type: Number, required: true },
   ingredients: { type: String, required: false },
-  image_url: {
+  imageUrl: {
     type: String,
     required: true,
   },
 });
 
 const cartItemSchema = new mongoose.Schema({
-  item_id: {
+  itemId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Item",
     required: true,
   },
-  user_id: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
   quantity: { type: Number, required: true },
-  creation_time_date: { type: Date, default: Date.now },
+  creationTimeDate: { type: Date, default: Date.now },
 });
 
 const orderSchema = new mongoose.Schema({
-  order_id: {
+  orderId: {
     type: mongoose.Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),
     required: true,
     unique: true,
   },
-  user_id: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  user_name: { type: String, required: true },
-  table_no: {
+  userName: { type: String, required: true },
+  tableNo: {
     type: Number,
     ref: "Table",
     required: true,
   },
-  order_date_time: { type: Date, default: Date.now },
+  orderDateTime: { type: Date, default: Date.now },
   status: { type: String, required: true, default: "waiting" },
-  item_id: {
+  itemId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Item",
     required: true,
@@ -107,12 +107,12 @@ const orderSchema = new mongoose.Schema({
 });
 
 const newOrderSchema = new mongoose.Schema({
-  order_id: {
+  orderId: {
     type: String,
     required: true,
     default: () => new mongoose.Types.ObjectId(),
   },
-  user_id: {
+  userId: {
     type: String,
     required: true,
   },

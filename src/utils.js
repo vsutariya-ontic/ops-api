@@ -28,17 +28,17 @@ const verifyToken = (token) => {
 
 const handlePostSignup = async (req, res) => {
   try {
-    const { user_name, user_email, user_password, user_role } = req.body;
+    const { userName, userEmail, userPassword, userRole } = req.body;
 
     const hashedPassword = await bcrypt.hash(
-      user_password,
+      userPassword,
       SALT_ROUNDS_FOR_HASHING
     );
     const newUser = new User({
-      user_name: user_name,
-      user_password: hashedPassword,
-      user_role: user_role,
-      user_email: user_email,
+      userName: userName,
+      userPassword: hashedPassword,
+      userRole: userRole,
+      userEmail: userEmail,
     });
     const response = await newUser.save();
 
@@ -59,10 +59,10 @@ const handlePostLogin = async (req, res) => {
   // Validate username and password...
   try {
     console.log(req.body);
-    const { user_password, user_email, user_role } = req.body;
+    const { userPassword, userEmail, userRole } = req.body;
     const user = await User.find({
-      user_email: user_email,
-      user_role: user_role.toLowerCase(),
+      userEmail: userEmail,
+      userRole: userRole.toLowerCase(),
     });
     if (!user) {
       res.json({
@@ -71,10 +71,7 @@ const handlePostLogin = async (req, res) => {
       });
       return;
     }
-    const isCorrect = await bcrypt.compare(
-      user_password,
-      user[0].user_password
-    );
+    const isCorrect = await bcrypt.compare(userPassword, user[0].userPassword);
     if (!isCorrect) {
       res.json({
         success: false,
@@ -83,10 +80,10 @@ const handlePostLogin = async (req, res) => {
       return;
     }
     const userData = {
-      user_id: user[0].user_id,
-      user_email: user[0].user_email,
-      user_name: user[0].user_name,
-      user_role: user[0].user_role,
+      userId: user[0].userId,
+      userEmail: user[0].userEmail,
+      userName: user[0].userName,
+      userRole: user[0].userRole,
     };
     const authToken = await generateToken(userData, 1000 * 60 * 60 * 24 * 7); // 7 days
     console.log("token type", authToken);
@@ -100,7 +97,7 @@ const handlePostLogin = async (req, res) => {
 
     res.json({
       success: true,
-      auth_token: authToken,
+      authToken: authToken,
       message: "User logged in successfully",
       userData: userData,
     });
@@ -113,7 +110,7 @@ const handlePostLogin = async (req, res) => {
 };
 
 const handlePostValidate = async (req, res) => {
-  // const token = req.body.auth_token;
+  // const token = req.body.authToken;
   // try {
   res.json({
     success: true,
@@ -131,12 +128,12 @@ const handlePostCreateItem = async (req, res) => {
     const { itemName, category, timeToPrepare, ingredients, imageUrl } =
       req.body;
     const newItem = new Item({
-      item_name: itemName,
+      itemName: itemName,
       category: category,
-      time_to_make: timeToPrepare,
+      timeToMake: timeToPrepare,
       ingredients: ingredients,
-      quantity_left: 0,
-      image_url: imageUrl,
+      quantityLeft: 0,
+      imageUrl: imageUrl,
     });
     const successfullySaved = await newItem.save();
     res.json({
@@ -152,7 +149,7 @@ const handlePostCreateItem = async (req, res) => {
 };
 const handlePostGetItem = async (req, res) => {
   try {
-    // const valid = await verifyToken(req.body.auth_token);
+    // const valid = await verifyToken(req.body.authToken);
     const query = req.query;
     if (!query) {
       const itemList = await Item.find();
@@ -176,14 +173,14 @@ const handlePostGetItem = async (req, res) => {
 };
 const handleUploadCartItem = async (req, res) => {
   try {
-    const { user_email, item_id, quantity } = req.body;
+    const { userEmail, itemId, quantity } = req.body;
     const user = await User.find({
-      user_email: user_email,
+      userEmail: userEmail,
     });
     if (user) {
       const deletion = await CartItem.deleteMany({
-        item_id: item_id,
-        user_id: user[0].user_id,
+        itemId: itemId,
+        userId: user[0].userId,
       });
       if (quantity === 0) {
         res.json({
@@ -192,8 +189,8 @@ const handleUploadCartItem = async (req, res) => {
         });
       } else {
         const newCartItem = new CartItem({
-          item_id: item_id,
-          user_id: user[0].user_id,
+          itemId: itemId,
+          userId: user[0].userId,
           quantity: quantity,
         });
         const successfullySaved = await newCartItem.save();
@@ -219,14 +216,14 @@ const handleUploadCartItem = async (req, res) => {
 };
 const handlePostGetCartItemQuantity = async (req, res) => {
   try {
-    const { user_email, item_id } = req.body;
+    const { userEmail, itemId } = req.body;
     const user = await User.find({
-      user_email: user_email,
+      userEmail: userEmail,
     });
     if (user.length) {
       const cartItem = await CartItem.find({
-        user_email: user.user_id,
-        item_id: item_id,
+        userEmail: user.userId,
+        itemId: itemId,
       });
       if (cartItem.length) {
         res.json({
@@ -257,15 +254,15 @@ const handlePostGetCartItemQuantity = async (req, res) => {
 const handlePostGetCartItemList = async (req, res) => {
   try {
     const user = await User.find({
-      user_email: req.body.user_email,
+      userEmail: req.body.userEmail,
     });
     if (user.length) {
       const cartItemList = await CartItem.find({
-        user_id: user[0].user_id,
+        userId: user[0].userId,
       });
       const items = cartItemList.map(async (item) => {
         const target = await Item.find({
-          item_id: item.item_id,
+          itemId: item.itemId,
         });
         return target[0];
       });
@@ -305,14 +302,14 @@ const handlePostGetTableList = async (req, res) => {
 
 const handlePostGetDefaultTable = async (req, res) => {
   try {
-    const { user_email } = req.body;
+    const { userEmail } = req.body;
     const user = await User.find({
-      user_email: user_email,
+      userEmail: userEmail,
     });
     if (user) {
-      if (user[0].table_no) {
+      if (user[0].tableNo) {
         const table = await Table.find({
-          table_no: user[0].table_no,
+          tableNo: user[0].tableNo,
         });
         res.json({
           success: true,
@@ -340,17 +337,17 @@ const handlePostGetDefaultTable = async (req, res) => {
 
 const handlePostSetDefaultTable = async (req, res) => {
   try {
-    const { auth_token, table_no } = req.body;
+    const { authToken, tableNo } = req.body;
 
-    const userData = await verifyToken(auth_token);
+    const userData = await verifyToken(authToken);
 
     const done = await User.updateOne(
       {
-        user_email: userData.user_email,
+        userEmail: userData.userEmail,
       },
       {
         $set: {
-          table_no: table_no,
+          tableNo: tableNo,
         },
       }
     );
@@ -376,19 +373,19 @@ const handlePostSetDefaultTable = async (req, res) => {
 
 const handlePlaceOrder = async (req, res) => {
   try {
-    const { auth_token, instructions, table_no } = req.body;
-    const userData = await verifyToken(auth_token);
+    const { authToken, instructions, tableNo } = req.body;
+    const userData = await verifyToken(authToken);
     const cartItems = await CartItem.find({
-      user_id: userData.user_id,
+      userId: userData.userId,
     });
     const orders = cartItems.map((item) => {
       return {
-        user_id: item.user_id,
-        item_id: item.item_id,
-        table_no: table_no,
+        userId: item.userId,
+        itemId: item.itemId,
+        tableNo: tableNo,
         quantity: item.quantity,
         instructions: instructions,
-        user_name: userData.user_name,
+        userName: userData.userName,
       };
     });
     orders.forEach(async (order) => {
@@ -396,7 +393,7 @@ const handlePlaceOrder = async (req, res) => {
       await newOrder.save();
     });
     await CartItem.deleteMany({
-      user_id: userData.user_id,
+      userId: userData.userId,
     });
     console.log("success");
     res.json({
@@ -412,15 +409,15 @@ const handlePlaceOrder = async (req, res) => {
 
 const handlePostGetOrders = async (req, res) => {
   try {
-    const user_email = req.body.user_email;
+    const userEmail = req.body.userEmail;
     const user = await User.find({
-      user_email: user_email,
+      userEmail: userEmail,
     });
     if (user) {
       let orders;
-      if (user[0].user_role === "employee") {
+      if (user[0].userRole === "employee") {
         orders = await Order.find({
-          user_id: user[0].user_id,
+          userId: user[0].userId,
           status: "completed",
         });
       } else {
@@ -429,7 +426,7 @@ const handlePostGetOrders = async (req, res) => {
         });
       }
       const dataPromises = orders.map(async (order) => {
-        const item = await Item.find({ item_id: order.item_id });
+        const item = await Item.find({ itemId: order.itemId });
         return {
           order: order,
           item: item[0],
@@ -456,9 +453,9 @@ const handlePostGetOrders = async (req, res) => {
 
 const handlePostUpdateOrderStatus = async (req, res) => {
   try {
-    const { order_id, new_status } = req.body;
+    const { orderId, new_status } = req.body;
     const order = await Order.findOneAndUpdate(
-      { order_id: order_id },
+      { orderId: orderId },
       { $set: { status: new_status } },
       { new: true }
     );
@@ -477,15 +474,15 @@ const handlePostUpdateOrderStatus = async (req, res) => {
 
 const handlePostGetPendingOrders = async (req, res) => {
   try {
-    const user_email = req.body.user_email;
+    const userEmail = req.body.userEmail;
     const user = await User.find({
-      user_email: user_email,
+      userEmail: userEmail,
     });
     if (user) {
       let orders;
-      if (user[0].user_role === "employee") {
+      if (user[0].userRole === "employee") {
         orders = await Order.find({
-          user_id: user[0].user_id,
+          userId: user[0].userId,
           status: "waiting",
         });
       } else {
@@ -494,7 +491,7 @@ const handlePostGetPendingOrders = async (req, res) => {
         });
       }
       const dataPromises = orders.map(async (order) => {
-        const item = await Item.find({ item_id: order.item_id });
+        const item = await Item.find({ itemId: order.itemId });
         return {
           order: order,
           item: item[0],
@@ -521,15 +518,15 @@ const handlePostGetPendingOrders = async (req, res) => {
 
 const handlePostGetPreparingOrders = async (req, res) => {
   try {
-    const user_email = req.body.user_email;
+    const userEmail = req.body.userEmail;
     const user = await User.find({
-      user_email: user_email,
+      userEmail: userEmail,
     });
     if (user) {
       let orders;
-      if (user[0].user_role === "employee") {
+      if (user[0].userRole === "employee") {
         orders = await Order.find({
-          user_id: user[0].user_id,
+          userId: user[0].userId,
           status: "preparing",
         });
       } else {
@@ -538,7 +535,7 @@ const handlePostGetPreparingOrders = async (req, res) => {
         });
       }
       const dataPromises = orders.map(async (order) => {
-        const item = await Item.find({ item_id: order.item_id });
+        const item = await Item.find({ itemId: order.itemId });
         return {
           order: order,
           item: item[0],
