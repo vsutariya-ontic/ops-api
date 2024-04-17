@@ -76,7 +76,9 @@ app.post("/update-order-status", handlePostUpdateOrderStatus);
 /* user api call handlers */
 const handleNewPostLogin = async (request, response) => {};
 
-const handleNewPostSignup = async (request, response) => {};
+const handleNewPostSignup = async (request, response) => {
+  const {userFirstName, userLastName}
+};
 
 const handleNewGetValidate = async (request, response) => {
   response.json(getResponseJson());
