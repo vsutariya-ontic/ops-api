@@ -10,7 +10,13 @@ const UNAUTHORIZED_JSON = {
   error: "Unauthorized",
 };
 
-const NO_AUTH_MIDDLEWARE_PATHS = ["/new-login", "/new-signup", "/new-delete"];
+const NO_AUTH_MIDDLEWARE_PATHS = [
+  "/new-login",
+  "/new-signup",
+  "/new-delete",
+  "/login",
+  "/signup",
+];
 
 const OrderStatus = {
   1: "IN_CART",

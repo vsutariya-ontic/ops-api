@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User, Item, CartItem, Table, Order } = require("./models");
-const { JWT_KEY } = require("./constants");
+const { JWT_KEY, SALT_ROUNDS_FOR_HASHING } = require("./constants");
 
 const generateToken = (userData, validity) => {
   return new Promise((resolve, reject) => {
@@ -54,6 +54,7 @@ const handlePostSignup = async (req, res) => {
     });
   }
 };
+
 const handlePostLogin = async (req, res) => {
   // Validate username and password...
   try {
@@ -88,6 +89,14 @@ const handlePostLogin = async (req, res) => {
       user_role: user[0].user_role,
     };
     const authToken = await generateToken(userData, 1000 * 60 * 60 * 24 * 7); // 7 days
+    console.log("token type", authToken);
+
+    // TODO: DEPLOY AT SAME ORIGIN TO MAKE IT WORK... or maybe learn more :)
+    // res.cookie("auth", authToken, {
+    //   httpOnly: false, // Make the cookie accessible only via HTTP(S) and not JavaScript
+    //   secure: false, // Send the cookie only over HTTPS
+    //   sameSite: "strict", // Limit the cookie to same-site requests
+    // });
 
     res.json({
       success: true,
@@ -104,18 +113,17 @@ const handlePostLogin = async (req, res) => {
 };
 
 const handlePostValidate = async (req, res) => {
-  const token = req.body.auth_token;
-  try {
-    const data = await verifyToken(token);
-    res.json({
-      success: true,
-      userData: data,
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-    });
-  }
+  // const token = req.body.auth_token;
+  // try {
+  res.json({
+    success: true,
+    userData: req.userData,
+  });
+  // } catch (err) {
+  //   res.json({
+  //     success: false,
+  //   });
+  // }
 };
 
 const handlePostCreateItem = async (req, res) => {

@@ -1,6 +1,9 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+
+const { authMiddleware } = require("./authMIddleware");
 const {
   handlePostLogin,
   handlePostSignup,
@@ -18,11 +21,16 @@ const {
   handlePostUpdateOrderStatus,
   handlePostGetPendingOrders,
   handlePostGetPreparingOrders,
-} = require("../utils");
+} = require("./utils");
 
-const { authMiddleware } = require("../authMIddleware");
-const { readItem, readAllItems } = require("../crud");
-const { readUser, createUser, updateUser } = require("./crud");
+const {
+  readItem,
+  readAllItems,
+  readUser,
+  createUser,
+  updateUser,
+  createItem,
+} = require("./crud");
 
 // lodash imports
 const _isEmpty = require("lodash/isEmpty");
@@ -40,18 +48,24 @@ const getResponseJson = (data, success = true) => {
 };
 
 const app = express();
+
+/* Middlewares */
 app.use(express.json());
+app.use(cookieParser());
 
 // TODO: setup for the ui origin only
 app.use(
   cors({
     origin: "*",
     methods: "OPTIONS",
-    allowedHeaders: "Content-Type, Authorization",
+    allowedHeaders: "Authorization, Content-type",
     maxAge: 86400, // 86400 seconds = 24 hours
+    // credentials: true, // Allow cookies to be sent with requests
   })
 );
+
 app.use(authMiddleware);
+
 app.post("/login", handlePostLogin);
 app.post("/signup", handlePostSignup);
 app.post("/validate", handlePostValidate);
@@ -94,8 +108,15 @@ const handleNewPostLogin = async (request, response) => {
       userRole: userRole,
     };
     const authToken = await generateToken(userData, 1000 * 60 * 60 * 24 * 7); // 7 days validity
-    // TODO: set as cookie
 
+    // TODO: set as cookie DEPLOY AT SAME ORIGIN TO MAKE IT WORK... or maybe learn more :)
+    // response.cookie("auth", authToken, {
+    //   httpOnly: false, // Allow access from client-side JavaScript
+    //   secure: false, // Allow sending over non-HTTPS connections (for testing)
+    //   sameSite: "None", // Allow cross-site requests
+    // });
+
+    // TODO: send token also
     response.json(getResponseJson(userData));
   } catch (err) {
     response.json(getResponseJson(err?.message || "INTERNAL_ERROR", false));
@@ -146,7 +167,7 @@ app.post("/new-login", handleNewPostLogin);
 app.post("/new-signup", handleNewPostSignup);
 app.delete("/new-delete", handleNewDeleteUser);
 app.get("/new-validate", handleNewGetValidate);
-app.put("/new-update-user", handleNewPutUser);
+app.put("/new-user", handleNewPutUser);
 
 /* item api call handlers */
 const handleNewGetItem = async (request, response) => {
@@ -162,7 +183,14 @@ const handleNewGetItem = async (request, response) => {
   }
 };
 
-const handleNewPostItem = async (request, response) => {};
+const handleNewPostItem = async (request, response) => {
+  try {
+    const successfullySavedItem = createItem(request.body);
+    response.json(getResponseJson(successfullySavedItem));
+  } catch (err) {
+    response.json(getResponseJson("ITEM_CREATION_FAILED", false));
+  }
+};
 
 const handleNewDeleteItem = async (request, response) => {};
 
