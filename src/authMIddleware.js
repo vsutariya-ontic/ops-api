@@ -68,6 +68,7 @@ const authMiddleware = async (req, res, next) => {
   } catch (err) {
     console.log(err);
     res.status(UNAUTHORIZED_STATUS_CODE).json(UNAUTHORIZED_JSON);
+    return;
   }
 };
 

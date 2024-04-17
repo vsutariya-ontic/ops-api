@@ -130,7 +130,7 @@ const newOrderSchema = new mongoose.Schema({
   },
 });
 
-const databaseName = "ops_db";
+const databaseName = "opsDatabase";
 const password = "5OvYZ1W6pWw8HXJO";
 const dbURI = `mongodb+srv://vsutariya:${password}@cluster-ops.0lqpr4h.mongodb.net/${databaseName}`;
 

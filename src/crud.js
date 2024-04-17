@@ -14,6 +14,7 @@ const readUser = async (userEmail, userRole) => {
     userEmail: userEmail,
     userRole: userRole.toLowerCase(),
   });
+  console.log(user?.[0], "data");
   return user?.[0];
 };
 

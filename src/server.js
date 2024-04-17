@@ -66,9 +66,9 @@ app.use(
 
 app.use(authMiddleware);
 
-app.post("/login", handlePostLogin);
-app.post("/signup", handlePostSignup);
-app.post("/validate", handlePostValidate);
+// app.post("/login", handlePostLogin);
+// app.post("/signup", handlePostSignup);
+// app.post("/validate", handlePostValidate);
 app.post("/createItem", handlePostCreateItem);
 app.post("/getItem", handlePostGetItem);
 
@@ -92,19 +92,22 @@ app.post("/update-order-status", handlePostUpdateOrderStatus);
 const handleNewPostLogin = async (request, response) => {
   try {
     const { userEmail, userPassword, userRole } = request.body;
-    const user = readUser(userEmail, userRole);
+    const user = await readUser(userEmail, userRole);
 
     if (_isEmpty(user)) {
+      console.log(user);
       response.json(getResponseJson("INVALID_CREDENTIALS", false));
+      return;
     }
 
-    const isCorrect = await bcrypt.compare(userPassword, user[0].userPassword);
+    const isCorrect = await bcrypt.compare(userPassword, user.userPassword);
     if (!isCorrect) {
       response.json(getResponseJson("INVALID_CREDENTIALS", false));
+      return;
     }
 
     const userData = {
-      userId: user[0].userId,
+      userId: user.userId,
       userRole: userRole,
     };
     const authToken = await generateToken(userData, 1000 * 60 * 60 * 24 * 7); // 7 days validity
@@ -117,7 +120,12 @@ const handleNewPostLogin = async (request, response) => {
     // });
 
     // TODO: send token also
-    response.json(getResponseJson(userData));
+    const detailedUserData = {
+      ...user._doc,
+      userPassword: undefined,
+      authToken,
+    };
+    response.json(getResponseJson(detailedUserData));
   } catch (err) {
     response.json(getResponseJson(err?.message || "INTERNAL_ERROR", false));
   }
@@ -148,7 +156,7 @@ const handleNewPostSignup = async (request, response) => {
 };
 
 const handleNewGetValidate = async (request, response) => {
-  response.json(getResponseJson());
+  response.json(getResponseJson(request.userData));
 };
 
 const handleNewDeleteUser = async (request, response) => {};
@@ -163,10 +171,10 @@ const handleNewPutUser = async (request, response) => {
 };
 
 /* user endpoints */
-app.post("/new-login", handleNewPostLogin);
-app.post("/new-signup", handleNewPostSignup);
+app.post("/login", handleNewPostLogin);
+app.post("/signup", handleNewPostSignup);
 app.delete("/new-delete", handleNewDeleteUser);
-app.get("/new-validate", handleNewGetValidate);
+app.get("/validate", handleNewGetValidate);
 app.put("/new-user", handleNewPutUser);
 
 /* item api call handlers */
