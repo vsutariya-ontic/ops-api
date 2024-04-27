@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { OrderStatus } from "../../constants/constants";
 
 export const orderSchema = new mongoose.Schema({
   orderId: {
@@ -12,7 +13,7 @@ export const orderSchema = new mongoose.Schema({
   },
   table: {
     type: Object,
-    required: false,
+    required: true,
   },
   items: {
     type: Array,
@@ -21,10 +22,12 @@ export const orderSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
+    default: OrderStatus.PLACED,
   },
   createdTime: {
     type: Object,
     required: false,
+    default: () => Date.now(),
   },
   instructions: {
     type: String,

@@ -6,7 +6,7 @@ export const tableSchema = new mongoose.Schema({
     required: true,
     default: () => String(new mongoose.Types.ObjectId()),
   },
-  tableNo: { type: Number, required: false, unique: true },
+  tableNo: { type: Number, required: false },
   tableName: { type: String, required: false },
   teamId: {
     type: String,

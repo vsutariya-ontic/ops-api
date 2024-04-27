@@ -61,7 +61,6 @@ const authMiddleware = async (req, res, next) => {
     const userDataToken: UserDataToken = await verifyToken(authToken);
 
     const userData = await readUserById(userDataToken.userId);
-    console.log(userData);
     userData.userPassword = undefined;
     req.userData = userData;
 
@@ -69,7 +68,6 @@ const authMiddleware = async (req, res, next) => {
   } catch (err) {
     console.log(err);
     res.status(UNAUTHORIZED_STATUS_CODE).json(UNAUTHORIZED_JSON);
-    return;
   }
 };
 

@@ -16,4 +16,9 @@ export const itemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  createdTime: {
+    type: Object,
+    required: false,
+    default: () => Date.now(),
+  },
 });

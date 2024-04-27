@@ -31,6 +31,7 @@ const createOrder = async (propsOrder) => {
   const successfullySavedOrder = await createdOrder.save();
   return successfullySavedOrder;
 };
+
 const updateOrder = async (propsOrder) => {
   // TODO: check if $set works with upsert...
   const successfullySavedOrder = await Order.findOneAndUpdate(

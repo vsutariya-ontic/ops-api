@@ -25,7 +25,10 @@ const handleGetItem = async (request, response) => {
 
 const handlePostItem = async (request, response) => {
   try {
-    const successfullySavedItem = await createItem(request.body);
+    const successfullySavedItem = await createItem({
+      ...request.body,
+      createdBy: request.userData.userId,
+    });
     response.json(getResponseJson(successfullySavedItem));
   } catch (err) {
     response.json(

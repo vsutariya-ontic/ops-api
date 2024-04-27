@@ -1,4 +1,4 @@
-import { updateCart } from "../data/cart/cartOperations";
+import { deleteCart } from "../data/cart/cartOperations";
 import {
   createOrder,
   readAllOrders,
@@ -26,10 +26,9 @@ const handlePostOrder = async (request, response) => {
       ...request.body,
       userId: request.userData.userId,
     });
-    const successfullyDeletedCart = await updateCart({
-      userId: request.userData.userId,
-      isDeleted: true,
-    });
+
+    const successfullyDeletedCart = await deleteCart(request.userData.userId);
+
     response.json(getResponseJson(successfullySavedOrder));
   } catch (err) {
     response.json(getResponseJson(err?.message, false));

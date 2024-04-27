@@ -54,8 +54,8 @@ app.use(
   })
 );
 
-app.use(authMiddleware);
 app.use(connectMongoDBMiddleware);
+app.use(authMiddleware);
 
 /* user endpoints */
 app.get("/validate", handleGetValidate);
@@ -85,11 +85,6 @@ app.delete("/table", handleDeleteTable);
 app.get("/cart", handleGetCart);
 app.put("/cart", handlePutCart);
 app.delete("/cart", handleDeleteCart);
-
-app.get("/", async (req, res) => {
-  console.log("works");
-  res.send("works");
-});
 
 app.use(disconnectFromMongoDB);
 

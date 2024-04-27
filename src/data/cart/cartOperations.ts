@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Cart } from "../mongoConfig/mongoConnection";
 
 /* Cart */
@@ -6,8 +7,8 @@ const readCart = async (userId, isDeleted = false) => {
     userId: userId,
     isDeleted: isDeleted,
   });
-  const items = cart?.[0]?.items;
-  return items;
+  // const items = cart?.[0]?.items;
+  return cart?.[0];
 };
 
 const updateCart = async (propsCart) => {
@@ -16,12 +17,16 @@ const updateCart = async (propsCart) => {
     {
       userId: propsCart.userId,
       cartId: propsCart.cartId || undefined,
-      status: propsCart.status,
       isDeleted: false,
     },
     {
       $set: {
-        ...propsCart,
+        items: propsCart.items,
+      },
+      $setOnInsert: {
+        cartId: String(new mongoose.Types.ObjectId()),
+        userId: propsCart.userId,
+        isDeleted: false,
       },
     },
     {
@@ -29,7 +34,26 @@ const updateCart = async (propsCart) => {
       upsert: Boolean(!propsCart.cartId),
     }
   );
+  console.log(successfullySavedCart);
   return successfullySavedCart;
 };
 
-export { readCart, updateCart };
+const deleteCart = async (userId: string) => {
+  const successfullyDeletedCart = await Cart.findOneAndUpdate(
+    {
+      userId: userId,
+      isDeleted: false,
+    },
+    {
+      $set: {
+        isDeleted: true,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+  return successfullyDeletedCart;
+};
+
+export { deleteCart, readCart, updateCart };

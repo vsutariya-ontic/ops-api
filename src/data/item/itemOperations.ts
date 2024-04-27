@@ -11,7 +11,6 @@ const readItem = async (itemId) => {
 
 const readAllItems = async (query) => {
   const items = await Item.find(query);
-  console.log(items);
   return items;
 };
 

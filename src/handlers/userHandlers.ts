@@ -12,7 +12,6 @@ const handlePostLogin = async (request, response) => {
     const user = await readUser(userEmail, userRole);
 
     if (_isEmpty(user)) {
-      console.log(user);
       response.json(getResponseJson("INVALID_CREDENTIALS", false));
       return;
     }
